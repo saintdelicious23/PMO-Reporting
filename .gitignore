@@ -1,0 +1,8 @@
+node_modules/
+.npm-cache/
+apps/web/dist/
+.env
+*.log
+backups/*.json
+backups/*.sql
+data/postgres/
