@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
-import { seedProjects, seedStats } from "./seed-data.ts";
+import { seedDepartmentCode, seedProjects, seedStats } from "./seed-data.ts";
 
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL nije podešen.");
 const pool = new pg.Pool({ connectionString:process.env.DATABASE_URL });
@@ -21,17 +21,20 @@ try {
   for(const name of departmentNames){
     let department=await client.query("SELECT id FROM departments WHERE lower(name)=lower($1)",[name]);
     if(!department.rowCount)department=await client.query(`INSERT INTO departments(id,code,name,position)
-      VALUES($1,$2,$3,(SELECT COALESCE(MAX(position),0)+1 FROM departments)) RETURNING id`,[randomUUID(),`SEED-${randomUUID().slice(0,8).toUpperCase()}`,name]);
+      VALUES($1,$2,$3,(SELECT COALESCE(MAX(position),0)+1 FROM departments)) RETURNING id`,[randomUUID(),seedDepartmentCode(name),name]);
     departmentIds.set(name,String(department.rows[0].id));
   }
   for(const project of seedProjects) {
     await client.query(`INSERT INTO projects
-      (id,project_number,project_code,name,category,lead_department_id,owner,sponsor,coordinator,delivery_lead,lifecycle_status,description,objective,outcome,baseline_finish,forecast_finish,mandatory_deadline,value_score,urgency_score,consequence_score,final_priority,management_attention,is_demo,created_at,updated_at)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)`,[
-      project.id,project.projectNumber,project.projectCode,project.name,project.category,project.leadDepartment?departmentIds.get(project.leadDepartment)??null:null,project.owner,project.sponsor,project.coordinator,project.deliveryLead,project.lifecycleStatus,
-      project.description,project.objective,project.outcome,project.baselineFinish,project.forecastFinish,project.mandatoryDeadline,project.valueScore,project.urgencyScore,project.consequenceScore,
+      (id,project_number,project_code,name,category,lead_department_id,lifecycle_status,description,objective,outcome,planned_start,actual_start,baseline_finish,forecast_finish,mandatory_deadline,value_score,urgency_score,consequence_score,final_priority,management_attention,is_demo,created_at,updated_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)`,[
+      project.id,project.projectNumber,project.projectCode,project.name,project.category,project.leadDepartment?departmentIds.get(project.leadDepartment)??null:null,project.lifecycleStatus,
+      project.description,project.objective,project.outcome,project.plannedStart,project.actualStart,project.baselineFinish,project.forecastFinish,project.mandatoryDeadline,project.valueScore,project.urgencyScore,project.consequenceScore,
       project.finalPriority,project.managementAttention,true,dateShift(project.lastUpdatedAt,-90),project.lastUpdatedAt
     ]);
+    for(const assignment of project.roles)await client.query(`INSERT INTO project_role_assignments
+      (id,project_id,role,person_name,is_primary,position) VALUES($1,$2,$3,$4,$5,$6)`,
+      [assignment.id,project.id,assignment.role,assignment.name,assignment.isPrimary,assignment.position]);
 
     const currentDate=project.lastUpdatedAt;
     const previousDate=dateShift(currentDate,-14);

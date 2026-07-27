@@ -6,3 +6,4 @@ apps/web/dist/
 backups/*.json
 backups/*.sql
 data/postgres/
+tmp/

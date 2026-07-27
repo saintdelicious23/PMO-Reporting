@@ -1,0 +1,348 @@
+/*
+ * Optional "Monolit" theme.
+ * Deep navy, warm ivory, restrained gold, square modules, thin rules and a
+ * spacious sans-serif hierarchy.
+ */
+body[data-theme="monolith"]{
+  --navy:#102f40;
+  --ink:#102f40;
+  --muted:#68777b;
+  --blue:#173f52;
+  --line:#d3cfc7;
+  --soft:#eae7e1;
+  --white:#fbfaf7;
+  --green:#3f7662;
+  --amber:#b27d2e;
+  --red:#a34747;
+  --critical:#712c37;
+  --rose:#91465d;
+  --radius:0;
+  --shadow:none;
+  background:#f5f3ee;
+  color:#102f40;
+  font-family:"Aptos","Segoe UI Variable Text","Segoe UI",Arial,sans-serif;
+}
+body[data-theme="monolith"] .app-header{
+  height:62px;
+  border-bottom:2px solid #b9945a;
+  background:#f7f5f0;
+  color:#102f40;
+  box-shadow:none;
+}
+body[data-theme="monolith"] .brand strong{
+  color:#102f40;
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+body[data-theme="monolith"] .brand small{color:#667c89;font-size:9px;font-weight:600;letter-spacing:.15em}
+body[data-theme="monolith"] .brand img{filter:none}
+body[data-theme="monolith"] .header-icon-button{
+  border-color:#9ea9ad;
+  border-radius:0;
+  background:transparent;
+  color:#102f40;
+  box-shadow:none;
+}
+body[data-theme="monolith"] .header-icon-button:hover{border-color:#102f40;background:#e8e5df}
+body[data-theme="monolith"] .header-icon-button.add{border-color:#b9945a;background:#b9945a;color:#102f40}
+body[data-theme="monolith"] .theme-header-toggle{border-color:#b9945a;background:#102f40;color:#fbfaf7}
+body[data-theme="monolith"] .demo-header-toggle.active{border-color:#102f40;background:#e5e1d9;color:#102f40}
+body[data-theme="monolith"] .header-action-separator{background:#b9b5ad}
+
+body[data-theme="monolith"] .page-shell{position:relative;max-width:1720px;padding:25px 30px 75px}
+body[data-theme="monolith"] .page-shell:before{
+  content:"";
+  position:fixed;
+  z-index:-1;
+  right:-150px;
+  top:175px;
+  width:390px;
+  height:390px;
+  transform:rotate(45deg);
+  background:#12384a09;
+  pointer-events:none;
+}
+body[data-theme="monolith"] .kpi-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+body[data-theme="monolith"] .kpi-card{
+  min-height:84px;
+  padding:12px 16px;
+  border:0;
+  border-radius:0;
+  background:#102f40;
+  color:#fff;
+  box-shadow:none;
+}
+body[data-theme="monolith"] .kpi-card:before{top:auto;right:0;bottom:0;width:auto;height:3px;background:#b9945a!important}
+body[data-theme="monolith"] .kpi-card span{color:#dce5e8;font-size:9px;font-weight:600;letter-spacing:.13em}
+body[data-theme="monolith"] .kpi-card strong{margin-top:8px;color:#fff;font-size:31px;font-weight:400}
+
+body[data-theme="monolith"] .overview-row{margin-top:11px;gap:8px}
+body[data-theme="monolith"] .attention-strip{
+  padding:9px 12px;
+  border:1px solid #d9ccb2;
+  border-left:4px solid #b9945a;
+  border-radius:0;
+  background:#eee7d9;
+}
+body[data-theme="monolith"] .attention-icon{border-radius:0;background:#102f40;color:#fff}
+body[data-theme="monolith"] .attention-strip strong{color:#102f40;font-size:13px;font-weight:700;letter-spacing:.02em}
+body[data-theme="monolith"] .attention-strip small,
+body[data-theme="monolith"] .attention-facts{color:#314c58}
+body[data-theme="monolith"] .attention-facts b{color:#102f40;font-weight:500}
+body[data-theme="monolith"] .attention-facts>span{border-color:#d9ceb8;background:#faf8f3}
+body[data-theme="monolith"] .attention-facts small{color:#6f7877}
+body[data-theme="monolith"] .attention-strip .text-button{color:#38515d}
+body[data-theme="monolith"] .attention-heading .text-button.active{background:#102f40;color:#fff}
+body[data-theme="monolith"] .display-button,
+body[data-theme="monolith"] .toolbar-button,
+body[data-theme="monolith"] .icon-button{
+  border:0;
+  border-radius:0;
+  background:#102f40;
+  color:#fff;
+  box-shadow:none;
+  font-weight:600;
+}
+body[data-theme="monolith"] .display-button:hover,
+body[data-theme="monolith"] .toolbar-button:hover{background:#1c4659}
+body[data-theme="monolith"] .view-panel,
+body[data-theme="monolith"] .filter-panel{
+  border:1px solid #c8c4bd;
+  border-radius:0;
+  background:#eae7e1;
+  box-shadow:none;
+}
+body[data-theme="monolith"] .segmented{border:0;border-radius:0;background:#dcd8d1}
+body[data-theme="monolith"] .segmented button{border-radius:0;color:#405966;font-weight:600}
+body[data-theme="monolith"] .segmented button.active{background:#102f40;color:#fff;box-shadow:none}
+body[data-theme="monolith"] .search-field{
+  border:0;
+  border-bottom:1px solid #102f40;
+  border-radius:0;
+  background:transparent;
+}
+body[data-theme="monolith"] .search-field:focus-within{box-shadow:inset 0 -2px #b9945a}
+
+body[data-theme="monolith"] .portfolio-group{
+  margin:24px 0 0;
+  overflow:visible;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+body[data-theme="monolith"] .group-head{
+  position:relative;
+  padding:11px 2px 9px;
+  border:0;
+  border-bottom:1px solid #102f40;
+  background:transparent;
+}
+body[data-theme="monolith"] .group-head:after{
+  content:"";
+  position:absolute;
+  bottom:-2px;
+  left:0;
+  width:112px;
+  height:3px;
+  background:#b9945a;
+}
+body[data-theme="monolith"] .group-head h2{
+  color:#102f40;
+  font-size:17px;
+  font-weight:500;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+body[data-theme="monolith"] .category-dot{display:none}
+body[data-theme="monolith"] .count{border-radius:0;background:#102f40;color:#fff;font-weight:500}
+body[data-theme="monolith"] .group-summary{color:#667982;font-weight:500}
+body[data-theme="monolith"] .collapse-button{border-radius:0;background:transparent;color:#102f40}
+
+body[data-theme="monolith"] .table-wrap{border-bottom:1px solid #aeb3b2;background:#fbfaf7}
+body[data-theme="monolith"] table{background:#fbfaf7}
+body[data-theme="monolith"] th{
+  padding-top:8px;
+  padding-bottom:8px;
+  border-bottom:0;
+  background:#102f40;
+  color:#fff;
+  font-size:9px;
+  font-weight:600;
+  letter-spacing:.105em;
+}
+body[data-theme="monolith"] th .sort-indicator{color:#b9945a}
+body[data-theme="monolith"] .sort-header:hover{background:#1a4354;color:#fff}
+body[data-theme="monolith"] .sort-header.active{
+  background:#1a4354;
+  color:#fff;
+  box-shadow:inset 0 -2px #b9945a;
+}
+body[data-theme="monolith"] .sort-header.active .sort-indicator{color:#d7bd86}
+body[data-theme="monolith"] td{border-bottom-color:#d2cec7;background:#fbfaf7}
+body[data-theme="monolith"] .project-row:hover,
+body[data-theme="monolith"] .project-row:hover td{background:#eeece7}
+body[data-theme="monolith"] .project-row.attention-row,
+body[data-theme="monolith"] .project-row.attention-row td{background:#f8f2ed}
+body[data-theme="monolith"] .project-row.decision-overdue,
+body[data-theme="monolith"] .project-row.decision-overdue td{background:#f5e9e6}
+body[data-theme="monolith"] .project-row.attention-row td:first-child{box-shadow:inset 3px 0 #a85a59}
+body[data-theme="monolith"] .project-row.decision-overdue td:first-child{box-shadow:inset 3px 0 #873e4d}
+body[data-theme="monolith"] .project-row.expanded,
+body[data-theme="monolith"] .project-row.expanded td{background:#ddd9d2}
+body[data-theme="monolith"] .project-row-action-head{background:#102f40}
+body[data-theme="monolith"] .project-row-action{background:#fbfaf7}
+body[data-theme="monolith"] .project-detail-toggle{
+  border-color:#102f40;
+  border-radius:0;
+  background:#fbfaf7;
+  color:#102f40;
+}
+body[data-theme="monolith"] .project-name strong{color:#123746;font-size:14px;font-weight:700}
+body[data-theme="monolith"] .project-name small,
+body[data-theme="monolith"] .cell-secondary{color:#718087}
+body[data-theme="monolith"] .category-label{color:#b9945a}
+body[data-theme="monolith"] .category-label.table-category{
+  border:1px solid #d7d1c6;
+  border-left:2px solid #b9945a;
+  background:#f1ede5;
+  color:#38515d;
+}
+body[data-theme="monolith"] .project-number{
+  min-width:29px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#8f6b32;
+  font-family:Consolas,monospace;
+  font-weight:700;
+}
+body[data-theme="monolith"] .health-badge{
+  padding-left:0;
+  border-radius:0;
+  background:transparent!important;
+  font-weight:600;
+}
+body[data-theme="monolith"] .priority-badge{border-radius:0;background:transparent!important;font-weight:600}
+body[data-theme="monolith"] .progress-cell>div{height:4px;border-radius:0;background:#d8d4cc}
+body[data-theme="monolith"] .progress-cell>div span{border-radius:0;background:#b9945a}
+
+body[data-theme="monolith"] .project-detail-row>td{border-color:#aaa69f;background:#dedad3}
+body[data-theme="monolith"] .expanded-project-card{
+  border:0;
+  border-radius:0;
+  background:#fbfaf7;
+  box-shadow:none;
+}
+body[data-theme="monolith"] .project-card-head{
+  min-height:72px;
+  border:0;
+  border-bottom:3px solid #b9945a;
+  background:#102f40;
+  color:#fff;
+}
+body[data-theme="monolith"] .card-relative-number{color:#b9945a;font-size:15px}
+body[data-theme="monolith"] .card-project-id{border:0;border-radius:0;background:transparent;color:#fff;box-shadow:none}
+body[data-theme="monolith"] .project-card-title strong{color:#fff;font-size:19px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+body[data-theme="monolith"] .project-card-title small{color:#c9d3d7}
+body[data-theme="monolith"] .project-card-state time span{color:#b9945a}
+body[data-theme="monolith"] .project-card-state time b{color:#fff}
+body[data-theme="monolith"] .project-card-state .button{border-color:#b9945a;background:#b9945a;color:#102f40}
+body[data-theme="monolith"] .card-signals{border-color:#d7c9aa;background:#eee7d9}
+body[data-theme="monolith"] .card-signal{border-radius:0;background:transparent;color:#102f40}
+body[data-theme="monolith"] .project-card-section{border-color:#d2cec7}
+body[data-theme="monolith"] .project-card-section>h3{
+  position:relative;
+  padding:10px 12px 8px;
+  border-color:#d2cec7;
+  background:#eae7e1;
+  color:#102f40;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+body[data-theme="monolith"] .project-card-section>h3:after{
+  content:"";
+  position:absolute;
+  bottom:-1px;
+  left:12px;
+  width:54px;
+  height:2px;
+  background:#b9945a;
+}
+body[data-theme="monolith"] .project-card-field{padding:11px 13px;border-color:#d9d5ce}
+body[data-theme="monolith"] .project-card-field>span{color:#79633c;font-size:9px;font-weight:700;letter-spacing:.12em}
+
+body[data-theme="monolith"] .drawer{border-left:3px solid #b9945a;background:#eae7e1;box-shadow:-18px 0 46px #102f4033}
+body[data-theme="monolith"] .drawer-head{border-bottom:3px solid #b9945a;background:#102f40}
+body[data-theme="monolith"] .drawer-head h2{font-size:24px;font-weight:500;letter-spacing:.055em;text-transform:uppercase}
+body[data-theme="monolith"] .drawer-head h2 span{border-radius:0;background:#ffffff12;color:#b9945a}
+body[data-theme="monolith"] .drawer-tabs{border:0;background:#fbfaf7}
+body[data-theme="monolith"] .drawer-tabs button{font-weight:600;letter-spacing:.035em}
+body[data-theme="monolith"] .drawer-tabs button.active{border-color:#b9945a;color:#102f40}
+body[data-theme="monolith"] .editor-section{border:0;border-radius:0;background:#fbfaf7;box-shadow:none}
+body[data-theme="monolith"] .section-title{border-bottom:1px solid #102f40;padding-bottom:8px}
+body[data-theme="monolith"] .section-title h3,
+body[data-theme="monolith"] .modal-head h2{color:#102f40;font-weight:500;letter-spacing:.055em;text-transform:uppercase}
+body[data-theme="monolith"] .eyebrow{color:#8c6b38;letter-spacing:.13em}
+body[data-theme="monolith"] .field span{color:#5f6f73;font-size:9px;font-weight:700;letter-spacing:.11em}
+body[data-theme="monolith"] .field input,
+body[data-theme="monolith"] .field select,
+body[data-theme="monolith"] .field textarea{
+  border-color:#bdb8b0;
+  border-radius:0;
+  background:#fbfaf7;
+}
+body[data-theme="monolith"] .field input:focus,
+body[data-theme="monolith"] .field select:focus,
+body[data-theme="monolith"] .field textarea:focus{border-color:#102f40;box-shadow:inset 3px 0 #b9945a}
+body[data-theme="monolith"] .person-chip-list{
+  border-color:#c8c1b7;
+  border-radius:0;
+  background:#fbfaf7;
+}
+body[data-theme="monolith"] .person-chip-list:focus-within{
+  border-color:#102f40;
+  box-shadow:inset 3px 0 #b9945a;
+}
+body[data-theme="monolith"] .person-chip{
+  border-color:#d4cdc1;
+  border-radius:0;
+  background:#f0ece4;
+}
+body[data-theme="monolith"] .person-chip.primary{border-color:#b9945a;background:#eee4d2}
+body[data-theme="monolith"] .person-chip button:hover{background:#dfd8cc}
+body[data-theme="monolith"] .check-field{border:0;border-radius:0;background:#eae7e1}
+body[data-theme="monolith"] .check-field.rose{background:#f3e9e6}
+body[data-theme="monolith"] .button{border-radius:0;box-shadow:none}
+body[data-theme="monolith"] .button.primary{background:#102f40;color:#fff}
+body[data-theme="monolith"] .button.ghost{border-color:#102f40;background:#fbfaf7;color:#102f40}
+body[data-theme="monolith"] .suggestion,
+body[data-theme="monolith"] .updated-label,
+body[data-theme="monolith"] .lifecycle-pill{border-radius:0;background:#e1ddd6;color:#102f40}
+body[data-theme="monolith"] .date-picker-icon{border-radius:0;background:#e5e1da;color:#102f40}
+body[data-theme="monolith"] .modal{border:3px solid #102f40;border-radius:0;background:#fbfaf7;box-shadow:0 24px 70px #102f4040}
+body[data-theme="monolith"] .close-button{border-radius:0}
+body[data-theme="monolith"] .toast{border-radius:0;background:#102f40;color:#fff}
+
+@media(max-width:900px){
+  body[data-theme="monolith"] .page-shell{padding-inline:14px}
+  body[data-theme="monolith"] .kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  body[data-theme="monolith"] .app-header{height:56px}
+  body[data-theme="monolith"] .brand strong{font-size:14px}
+  body[data-theme="monolith"] .page-shell{padding:12px 7px 48px}
+  body[data-theme="monolith"] .kpi-grid{display:flex}
+  body[data-theme="monolith"] .kpi-card{flex:0 0 145px}
+  body[data-theme="monolith"] .group-head h2{font-size:14px}
+  body[data-theme="monolith"] .project-card-title strong{font-size:16px}
+}
+
+@media print{
+  body[data-theme="monolith"]{background:#fff}
+  body[data-theme="monolith"] .app-header{display:none!important}
+}

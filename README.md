@@ -15,11 +15,31 @@ Logovi aplikacije dostupni su kroz `npm run docker:logs`. Za zaustavljanje koris
 
 PostgreSQL podaci ostaju u lokalnom folderu `data/postgres`. Komanda `docker compose down` ne briše podatke. Probni projekti se ne učitavaju automatski; po potrebi se mogu dodati komandom `docker compose exec app npm run db:seed`.
 
+Dok je aplikacija u pre-v1 fazi, šema se održava kao jedna početna migracija. Posle promene te migracije postojeću razvojnu ili probnu bazu treba obrisati i napraviti ponovo; kompatibilnost sa starom probnom šemom se namerno ne održava.
+
 Za produkciju kroz Portainer koristi se `compose.production.yaml`. Image se automatski objavljuje na
 `ghcr.io/saintdelicious23/pmo-reporting:latest` nakon slanja izmena na `master` granu. U Portainer
 stacku obavezno postaviti jaku vrednost za `POSTGRES_PASSWORD`.
 
+### Portainer ažuriranje pre v1
+
+Dok su svi podaci probni, promenjena početna migracija zahteva novu praznu PostgreSQL bazu. Postojeća
+baza ne treba da se nadograđuje preko stare šeme, jer je migracija `001_initial.sql` već označena kao
+izvršena.
+
+1. Sačekati da GitHub Actions uspešno objavi novi `latest` image.
+2. Sačuvati tekst trenutnog Portainer stacka, zatim ukloniti stack.
+3. U Portainer meniju `Volumes` obrisati volume koji se završava sa `_reporting_postgres`.
+4. Ponovo napraviti stack iz `compose.production.yaml`, sa istim `POSTGRES_PASSWORD`, i pokrenuti ga.
+5. U konzoli `app` kontejnera pokrenuti `npm run db:seed` da se učitaju probni projekti.
+6. Pri prvom otvaranju aplikacije napraviti administratorski nalog.
+
+Za naredne izmene koje ne menjaju početnu šemu dovoljno je u Portaineru izabrati `Pull latest image`
+i `Update the stack`; PostgreSQL volume tada ostaje netaknut.
+
 Ako je port 4317 zauzet, u `.env` postaviti, na primer, `APP_PORT=8080`, pa aplikaciju otvoriti na `http://localhost:8080`.
+
+Docker PostgreSQL je na hostu podrazumevano dostupan na portu 5433, kako se ne bi sudario sa eventualnom lokalnom PostgreSQL instalacijom na portu 5432. Port se po potrebi menja promenljivom `POSTGRES_PORT`.
 
 ## Razvojni režim
 
@@ -29,7 +49,7 @@ Ako je port 4317 zauzet, u `.env` postaviti, na primer, `APP_PORT=8080`, pa apli
 4. Pokrenuti `npm install`, zatim `npm run dev`.
 5. Otvoriti adresu koju prikaže Vite.
 
-Probni podaci se čuvaju u PostgreSQL-u i označeni su poljem `isDemo`, pa se mogu uključiti ili isključiti u aplikaciji. Seed sadrži 41 sadržajno razrađen projekat: 12 strateških projekata, 13 regulatornih obaveza i 16 operativnih unapređenja.
+Probni podaci se čuvaju u PostgreSQL-u i mogu se uključiti ili isključiti u aplikaciji. Seed sadrži 41 sadržajno razrađen projekat: 12 strateških projekata, 13 regulatornih obaveza i 16 operativnih unapređenja.
 
 ## PostgreSQL režim
 
@@ -48,12 +68,25 @@ Seeder bezbedno staje ako PostgreSQL već sadrži projekte koji nisu deo probnog
 
 ## Podešavanja, pregledi i PDF
 
-Aplikacija ima četiri gotova nivoa detalja: Ultradetaljno, Standardno, Svedeno i Najosnovnije. Svaki može da se prikaže po kategorijama ili kao jedna objedinjena tabela.
+Aplikacija ima četiri gotova nivoa detalja: Sva polja, Standardno, Svedeno i Najosnovnije. Pregled `Sva polja` uvek sadrži kompletan skup raspoloživih podataka. Dugme `Prikaz` objedinjuje izbor nivoa detalja i grupisanja. Projekti mogu da se grupišu po kategorijama, po sektorima ili da se prikažu zajedno.
 
 Meni `Podešavanja` sadrži opšte postavke, šifarnik sektora i pravila PDF izveštavanja. Sektori mogu da se dodaju, preimenuju, poređaju i izbrišu. Kada se sektor izbriše, povezani projekti ostaju bez vodećeg sektora dok im se ručno ne dodeli novi.
 
+Prvo pokretanje prazne baze prikazuje kreiranje administratorskog naloga. Posle toga se aplikaciji
+pristupa korisničkim imenom i lozinkom, a administrator nove naloge pravi u meniju `Podešavanja`.
+
+Kod projekta se automatski dodeljuje pri kreiranju u formatu `GGGG-SEKTOR-NNN`, na primer `2026-FIN-003`. Ako vodeći sektor nije izabran, koristi se oznaka `GEN`. Jednom dodeljen kod se ne menja naknadnom promenom sektora.
+
 Dugme `Preuzmi PDF` direktno generiše i preuzima PDF bez sistemskog print dijaloga. Ime fajla automatski dobija datum i vreme, na primer `project-portfolio_2026-07-18_14-35-22.pdf`.
+
+## Uloge na projektu
+
+Projekat može imati jednog ili više sponzora, vlasnika, koordinatora i izvršilaca. Najmanje jedan vlasnik je obavezan, dok su ostale uloge opcione. Za svaku ulogu može da se označi jedna glavna osoba.
+
+Osobe se u editoru dodaju pojedinačno pritiskom na Enter ili unosom više imena razdvojenih zarezom. Ako koordinator ili izvršilac nisu posebno navedeni, podrazumevaju se vlasnici projekta; prazne opcione uloge se zato ne ponavljaju u kartičnom i tabelarnom prikazu. Nazivi uloga u prikazu automatski prelaze iz jednine u množinu kada ih ima više.
 
 ## Planirano
 
 Faze, isporuke i detaljno praćenje izvršenja nisu deo trenutnog modela aplikacije. Ako se funkcionalnost kasnije vrati, biće uvedena kao novi kompletan workflow sa sopstvenim migracijama, uređivanjem, statusiranjem i auditom.
+
+Otvorena UX odluka: relativni broj na kartici trenutno se nastavlja kroz kategorije, a pri grupisanju po sektorima kreće ponovo od 1 za svaki sektor. Pravilo treba ponovo potvrditi nakon praktične upotrebe oba pregleda.

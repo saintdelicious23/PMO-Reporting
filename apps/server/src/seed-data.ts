@@ -5,6 +5,18 @@ const today = new Date();
 const isoDate = (offset: number) => { const date = new Date(today); date.setDate(date.getDate() + offset); return date.toISOString().slice(0,10); };
 const timestamp = (offset: number) => { const date = new Date(today); date.setDate(date.getDate() + offset); return date.toISOString(); };
 const projectId = (number:number) => `00000000-0000-4000-8000-${String(number).padStart(12,"0")}`;
+const roleId = (projectNumber:number,position:number) => `20000000-${String(projectNumber).padStart(4,"0")}-4000-8000-${String(position).padStart(12,"0")}`;
+const seedDepartmentCodes:Record<string,string>={
+  "Administracija":"ADM","AML":"AML","Compliance":"COM","Corporate":"COR","Corporate Development":"CDV",
+  "Digital i Pravni poslovi":"DPP","Finansije":"FIN","Hotelske operacije":"HOP","Hrana i Piće":"HIP",
+  "Investicije":"INV","IT":"IT","IT Bezbednost":"ITB","IT i Analitika":"ITA","Komercijala i IT":"KIT",
+  "Kvalitet":"KVA","Ljudski resursi":"LJR","Magacinsko poslovanje":"MAG","Marketing":"MKT",
+  "Nabavka":"NAB","Nabavka i Compliance":"NIC","Obračun zarada":"OBZ","Operacije":"OPE",
+  "Operacije hrane i pića":"OHP","Pravni poslovi":"PRA","Privatnost":"PRI","Računovodstvo":"RAC",
+  "Rizici":"RIZ","Rizici i Bezbednost":"RIB","Tehnika":"TEH","Tehnika i Bezbednost":"TIB",
+  "Transport":"TRA","Trezor":"TRZ"
+};
+export const seedDepartmentCode=(name:string|null)=>name?seedDepartmentCodes[name]??"GEN":"GEN";
 
 type SeedSpec = {
   name:string; category:ProjectCategory; department:string|null; owner:string; sponsor?:string|null; coordinator?:string|null; deliveryLead?:string|null;
@@ -226,13 +238,19 @@ const specs:SeedSpec[] = [
 
 export const seedProjects:ProjectDetail[] = specs.map((spec,index) => {
   const number=index+1; const suggested=suggestPriority(spec.value,spec.urgency,spec.consequence);
+  const roles=[
+    ...(spec.sponsor?[{name:spec.sponsor,role:"sponsor" as const}]:[]),
+    {name:spec.owner,role:"owner" as const},
+    ...(spec.coordinator?[{name:spec.coordinator,role:"coordinator" as const}]:[]),
+    ...(spec.deliveryLead?[{name:spec.deliveryLead,role:"executor" as const}]:[])
+  ].map((assignment,roleIndex)=>({...assignment,id:roleId(number,roleIndex+1),isPrimary:true,position:0}));
   const project:ProjectDetail = {
-    id:projectId(number),projectCode:`PRJ-${String(number).padStart(4,"0")}`,projectNumber:number,name:spec.name,category:spec.category,leadDepartment:spec.department,leadDepartmentId:null,owner:spec.owner,
-    sponsor:spec.sponsor??null,coordinator:spec.coordinator??null,deliveryLead:spec.deliveryLead??null,lifecycleStatus:spec.lifecycle,
+    id:projectId(number),projectCode:`${today.getUTCFullYear()}-${seedDepartmentCode(spec.department)}-${String(number).padStart(3,"0")}`,projectNumber:number,name:spec.name,category:spec.category,leadDepartment:spec.department,leadDepartmentId:null,roles,lifecycleStatus:spec.lifecycle,
     description:spec.description,objective:spec.objective,outcome:spec.outcome,health:spec.health,trend:spec.trend,progress:spec.progress,
+    plannedStart:isoDate(-120+(number%20)),actualStart:spec.lifecycle==="planning"?null:isoDate(-114+(number%20)),
     baselineFinish:spec.baseline===undefined||spec.baseline===null?null:isoDate(spec.baseline),forecastFinish:spec.forecast===undefined||spec.forecast===null?null:isoDate(spec.forecast),
     mandatoryDeadline:spec.mandatory===undefined||spec.mandatory===null?null:isoDate(spec.mandatory),valueScore:spec.value,urgencyScore:spec.urgency,consequenceScore:spec.consequence,
-    finalPriority:spec.priority??suggested,priorityOverrideReason:null,suggestedPriority:suggested,nextMilestone:spec.milestone??null,nextMilestoneDate:spec.milestoneIn===undefined||spec.milestoneIn===null?null:isoDate(spec.milestoneIn),
+    finalPriority:spec.priority??suggested,suggestedPriority:suggested,nextMilestone:spec.milestone??null,nextMilestoneDate:spec.milestoneIn===undefined||spec.milestoneIn===null?null:isoDate(spec.milestoneIn),
     blockerState:spec.blocker==="blocked"?"blocked":"none",topBlocker:spec.topBlocker??null,decisionRequired:spec.decision??false,decisionText:spec.decisionText??null,
     decisionDueDate:spec.decisionIn===undefined||spec.decisionIn===null?null:isoDate(spec.decisionIn),managementAttention:spec.attention??false,isDemo:true,lastUpdatedAt:timestamp(spec.updated),lastStatusAt:timestamp(spec.updated)
   };

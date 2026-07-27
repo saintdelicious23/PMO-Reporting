@@ -10,16 +10,6 @@ await pool.query(`CREATE TABLE IF NOT EXISTS schema_migrations (
   version integer PRIMARY KEY,
   applied_at timestamptz NOT NULL DEFAULT now()
 )`);
-await pool.query(`DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema='public' AND table_name='departments' AND column_name='code'
-  ) THEN
-    ALTER TABLE departments ALTER COLUMN code
-      SET DEFAULT ('SEK-' || upper(substr(md5(random()::text), 1, 8)));
-  END IF;
-END $$`);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../database/migrations");
 const files = (await readdir(root)).filter((file) => file.endsWith(".sql")).sort();
 const appliedResult=await pool.query("SELECT version FROM schema_migrations");

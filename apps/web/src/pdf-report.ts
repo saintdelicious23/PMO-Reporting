@@ -1,4 +1,4 @@
-import type { PortfolioSettings, ProjectSummary } from "../../../packages/contracts/src/index.ts";
+import type { PortfolioSettings, ProjectRole, ProjectSummary } from "../../../packages/contracts/src/index.ts";
 import { columnLabels, viewOptions, type ColumnKey, type GroupMode, type ViewMode } from "./view-config.ts";
 
 let pdfMakePromise:Promise<Awaited<ReturnType<typeof loadPdfMake>>>|null=null;
@@ -10,12 +10,16 @@ async function loadPdfMake() {
 }
 
 const categoryLabels = { strategic:"Strateški projekat",mandatory:"Regulatorne obaveze",operational_improvement:"Operativno unapređenje" } as const;
-const healthLabels = { green:"Zeleno",amber:"Žuto",red:"Crveno",critical:"Kritično" } as const;
+const healthLabels = { gray:"Sivo",green:"Zeleno",amber:"Žuto",red:"Crveno",critical:"Kritično" } as const;
 const priorityLabels = { low:"Nizak",medium:"Srednji",high:"Visok",very_high:"Veoma visok",critical:"Kritičan" } as const;
 const trendLabels = { improving:"Poboljšava se",stable:"Stabilno",declining:"Pogoršava se" } as const;
 const lifecycleLabels = { planning:"Planiranje",active:"Aktivan",on_hold:"Privremeno obustavljen",blocked:"Blokiran",completed:"Završen",cancelled:"Otkazan" } as const;
 const colors = { navy:"#15233f",blue:"#315fd6",rose:"#b94770",green:"#13945f",amber:"#bd7608",red:"#bd3442",critical:"#801e32",slate:"#64748b",line:"#d9e1ea",soft:"#f3f6f9" };
 const categoryOrder:ProjectSummary["category"][]=["strategic","mandatory","operational_improvement"];
+const roleText=(project:ProjectSummary,role:ProjectRole,fallback="Nije definisano")=>{
+  const assignments=project.roles.filter(assignment=>assignment.role===role).sort((a,b)=>Number(b.isPrimary)-Number(a.isPrimary)||a.position-b.position);
+  return assignments.map(assignment=>`${assignment.name}${assignments.length>1&&assignment.isPrimary?" ★":""}`).join(", ")||fallback;
+};
 
 const formatDate = (value:string|null) => value ? new Intl.DateTimeFormat("sr-Latn-RS",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(`${value.slice(0,10)}T12:00:00`)) : "Nije određeno";
 const scoreText=(value:number,urgency=false)=>urgency&&value===5?"Rok probijen":["Nema","Nisko","Srednje","Visoko","Veoma visoko"][value]??String(value);
@@ -25,8 +29,9 @@ const timestampName = (date:Date) => {
 };
 
 function healthCell(project:ProjectSummary) {
-  const color=colors[project.health];
-  return { text:healthLabels[project.health],color,bold:true };
+  const health=project.lifecycleStatus==="planning"?"gray":project.health;
+  const color=health==="gray"?colors.slate:colors[health];
+  return { text:healthLabels[health],color,bold:true };
 }
 
 function projectCell(project:ProjectSummary) {
@@ -41,10 +46,10 @@ function cellFor(column:ColumnKey,project:ProjectSummary):unknown {
   if(column==="lifecycleStatus") return {text:lifecycleLabels[project.lifecycleStatus],bold:true};
   if(column==="health") return healthCell(project);
   if(column==="trend") return {text:trendLabels[project.trend],color:project.trend==="improving"?colors.green:project.trend==="declining"?colors.red:colors.slate};
-  if(column==="owner") return {text:project.owner,bold:true};
-  if(column==="sponsor") return {text:project.sponsor??"Nije definisano",color:project.sponsor?colors.navy:colors.slate};
-  if(column==="coordinator") return {text:project.coordinator??"Nije definisano",color:project.coordinator?colors.navy:colors.slate};
-  if(column==="deliveryLead") return {text:project.deliveryLead??"Nije definisano",bold:Boolean(project.deliveryLead),color:project.deliveryLead?colors.navy:colors.slate};
+  if(column==="owner") return {text:roleText(project,"owner"),bold:true};
+  if(column==="sponsor") {const text=roleText(project,"sponsor");return {text,color:text==="Nije definisano"?colors.slate:colors.navy};}
+  if(column==="coordinator") {const text=roleText(project,"coordinator");return {text,color:text==="Nije definisano"?colors.slate:colors.navy};}
+  if(column==="deliveryLead") {const text=roleText(project,"executor");return {text,bold:text!=="Nije definisano",color:text==="Nije definisano"?colors.slate:colors.navy};}
   if(column==="department") return {text:project.leadDepartment??"Bez sektora",color:project.leadDepartment?colors.navy:colors.slate};
   if(column==="description") return {text:project.description??"Nije definisano",color:project.description?colors.navy:colors.slate};
   if(column==="objective") return {text:project.objective??"Nije definisano",color:project.objective?colors.navy:colors.slate};
@@ -53,8 +58,9 @@ function cellFor(column:ColumnKey,project:ProjectSummary):unknown {
   if(column==="urgencyScore") return {text:scoreText(project.urgencyScore,true),bold:true};
   if(column==="consequenceScore") return {text:scoreText(project.consequenceScore),bold:true};
   if(column==="finalPriority") return {text:priorityLabels[project.finalPriority],bold:true,color:project.finalPriority==="critical"?colors.critical:project.finalPriority==="very_high"?colors.red:project.finalPriority==="high"?colors.amber:colors.slate};
-  if(column==="suggestedPriority") return {text:priorityLabels[project.suggestedPriority],bold:true,color:colors.slate};
   if(column==="progress") return {text:project.progress===null?"—":`${Math.round(project.progress)}%`,alignment:"right"};
+  if(column==="plannedStart") return {text:formatDate(project.plannedStart),bold:Boolean(project.plannedStart)};
+  if(column==="actualStart") return {text:formatDate(project.actualStart),bold:Boolean(project.actualStart)};
   if(column==="baselineFinish") return {text:formatDate(project.baselineFinish),bold:true};
   if(column==="forecastFinish") return {stack:[{text:formatDate(project.forecastFinish),bold:true},...(project.baselineFinish&&project.baselineFinish!==project.forecastFinish?[{text:`Prvobitni rok ${formatDate(project.baselineFinish)}`,fontSize:7,color:colors.slate,margin:[0,2,0,0]}]:[])]};
   if(column==="mandatoryDeadline") return {text:formatDate(project.mandatoryDeadline),bold:true};
@@ -67,11 +73,11 @@ function cellFor(column:ColumnKey,project:ProjectSummary):unknown {
   if(column==="decisionDueDate") return {text:formatDate(project.decisionDueDate),bold:Boolean(project.decisionDueDate)};
   if(column==="managementAttention") return {text:project.managementAttention?"Da":"Ne",bold:project.managementAttention,color:project.managementAttention?colors.rose:colors.slate};
   if(column==="isDemo") return {text:project.isDemo?"1 · Da":"0 · Ne",bold:project.isDemo,color:project.isDemo?colors.blue:colors.slate};
-  return {text:project.lastStatusAt?new Intl.DateTimeFormat("sr-Latn-RS",{dateStyle:"medium",timeStyle:"short"}).format(new Date(project.lastStatusAt)):"Nema statusa",color:colors.slate};
+  return {text:new Intl.DateTimeFormat("sr-Latn-RS",{dateStyle:"medium",timeStyle:"short"}).format(new Date(project.lastUpdatedAt)),color:colors.slate};
 }
 
 function columnWidths(columns:ColumnKey[]) {
-  const weight:Record<ColumnKey,number>={name:2.4,id:2,projectNumber:.8,category:1.4,lifecycleStatus:1.2,health:1,trend:1,owner:1.5,sponsor:1.5,coordinator:1.6,deliveryLead:1.5,department:1.3,description:2.6,objective:2.6,outcome:2.6,valueScore:1,urgencyScore:1,consequenceScore:1.2,finalPriority:1.1,suggestedPriority:1.2,progress:.9,baselineFinish:1.2,forecastFinish:1.4,mandatoryDeadline:1.2,nextMilestone:2,nextMilestoneDate:2.1,blockerState:1.1,blocker:2.4,decisionRequired:1,decisionText:2.4,decisionDueDate:1.2,managementAttention:1.2,isDemo:.9,lastUpdatedAt:1.4};
+  const weight:Record<ColumnKey,number>={name:2.4,id:2,projectNumber:.8,category:1.4,lifecycleStatus:1.2,health:1,trend:1,owner:1.5,sponsor:1.5,coordinator:1.6,deliveryLead:1.5,department:1.3,description:2.6,objective:2.6,outcome:2.6,valueScore:1,urgencyScore:1,consequenceScore:1.2,finalPriority:1.1,progress:.9,plannedStart:1.2,actualStart:1.2,baselineFinish:1.2,forecastFinish:1.4,mandatoryDeadline:1.2,nextMilestone:2,nextMilestoneDate:2.1,blockerState:1.1,blocker:2.4,decisionRequired:1,decisionText:2.4,decisionDueDate:1.2,managementAttention:1.2,isDemo:.9,lastUpdatedAt:1.4};
   const landscapeA4Width=841.89;
   const horizontalPageMargins=44;
   const horizontalCellPadding=8;
@@ -89,18 +95,24 @@ export function buildPortfolioPdfDefinition(projects:ProjectSummary[],viewMode:V
   const reportTagline=settings?.tagline??viewOption.label;
   const active=projects.filter(project=>!["completed","cancelled"].includes(project.lifecycleStatus));
   const kpis=[
-    ["U prikazu",projects.length],["Aktivni",active.length],["Zeleno",active.filter(project=>project.health==="green").length],
+    ["U prikazu",projects.length],["Aktivni",active.length],["Zeleno",active.filter(project=>project.lifecycleStatus!=="planning"&&project.health==="green").length],
     ["Žuto",active.filter(project=>project.health==="amber").length],["Crveno / kritično",active.filter(project=>project.health==="red"||project.health==="critical").length],
     ["Za reakciju",active.filter(project=>project.managementAttention||project.decisionRequired).length]
   ];
-  const columns=settings?.viewColumns?.[viewMode]??viewOption.columns;
+  const configuredColumns=settings?.viewColumns?.[viewMode]??viewOption.columns;
+  const columns=configuredColumns.filter(column=>column==="owner"||column!=="sponsor"&&column!=="coordinator"&&column!=="deliveryLead"||projects.some(project=>roleText(project,column==="deliveryLead"?"executor":column as ProjectRole,"")!==""));
   const makeTableHeader=()=>columns.map(column=>({text:columnLabels[column].toUpperCase(),fontSize:6.5,bold:true,color:"#42536a",fillColor:"#eaf0f5",margin:[2,3,2,3]}));
   const tableLayout={hLineColor:()=>colors.line,vLineColor:()=>colors.line,hLineWidth:()=>.5,vLineWidth:()=>.5};
   const content:unknown[]=[
     {columns:[{stack:[{text:`PORTFOLIO PROJEKATA · ${viewOption.label.toUpperCase()}`,fontSize:8,bold:true,color:colors.blue,characterSpacing:1.1},{text:reportTitle,fontSize:20,bold:true,color:colors.navy,margin:[0,3,0,0]},{text:reportTagline,fontSize:8.5,color:colors.slate,margin:[0,4,0,0]}]},{stack:[{text:"GENERISANO",fontSize:7,bold:true,color:colors.slate,alignment:"right"},{text:new Intl.DateTimeFormat("sr-Latn-RS",{dateStyle:"medium",timeStyle:"medium"}).format(generatedAt),fontSize:9,bold:true,color:colors.navy,alignment:"right",margin:[0,3,0,0]},{text:filterSummary,fontSize:7,color:colors.slate,alignment:"right",margin:[0,3,0,0]}],width:230}],margin:[0,0,0,10]},
     {table:{widths:kpis.map(()=>"*"),body:[kpis.map(([label])=>({text:label,fontSize:7,bold:true,color:colors.slate,fillColor:colors.soft,margin:[2,2,2,0]})),kpis.map(([,value])=>({text:String(value),fontSize:18,bold:true,color:colors.navy,fillColor:"#ffffff",margin:[2,0,2,3]}))]},layout:{hLineColor:()=>colors.line,vLineColor:()=>colors.line,hLineWidth:()=>.5,vLineWidth:()=>.5},margin:[0,0,0,10]}
   ];
-  const groups = groupMode==="all" ? [{label:"Svi projekti",projects}] : categoryOrder.map(category=>({label:categoryLabels[category],projects:projects.filter(project=>project.category===category)}));
+  const departmentNames=[...new Set(projects.map(project=>project.leadDepartment).filter((name):name is string=>Boolean(name)))].sort((a,b)=>a.localeCompare(b,"sr"));
+  const groups = groupMode==="all"
+    ? [{label:"Svi projekti",projects}]
+    : groupMode==="department"
+      ? [...departmentNames.map(department=>({label:department,projects:projects.filter(project=>project.leadDepartment===department)})),...(projects.some(project=>!project.leadDepartment)?[{label:"Bez sektora",projects:projects.filter(project=>!project.leadDepartment)}]:[])]
+      : categoryOrder.map(category=>({label:categoryLabels[category],projects:projects.filter(project=>project.category===category)}));
   for(const item of groups) {
     const group=item.projects;
     content.push({columns:[{text:item.label,fontSize:12,bold:true,color:colors.navy},{text:`${group.length} projekata  ·  ${group.filter(project=>project.health==="red"||project.health==="critical").length} crveno/kritično  ·  ${group.filter(project=>project.managementAttention||project.decisionRequired).length} za reakciju`,fontSize:7,color:colors.slate,alignment:"right"}],margin:[0,5,0,4]});

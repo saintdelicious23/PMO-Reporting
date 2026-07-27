@@ -18,11 +18,11 @@ export type UrgencyScore = Score | 5;
 
 export type PortfolioViewMode = "detailed" | "engaged" | "executive" | "goldfish";
 
-export const portfolioGroupModes = ["category", "all"] as const;
+export const portfolioGroupModes = ["category", "department", "all"] as const;
 export type PortfolioGroupMode = (typeof portfolioGroupModes)[number];
-export const portfolioSortKeys = ["id", "projectNumber", "name", "category", "leadDepartment", "owner", "sponsor", "coordinator", "deliveryLead", "lifecycleStatus", "description", "objective", "outcome", "health", "trend", "progress", "baselineFinish", "forecastFinish", "mandatoryDeadline", "valueScore", "urgencyScore", "consequenceScore", "finalPriority", "suggestedPriority", "nextMilestone", "nextMilestoneDate", "blockerState", "topBlocker", "decisionRequired", "decisionText", "decisionDueDate", "managementAttention", "isDemo", "lastUpdatedAt"] as const;
+export const portfolioSortKeys = ["id", "projectNumber", "name", "category", "leadDepartment", "owner", "sponsor", "coordinator", "deliveryLead", "lifecycleStatus", "description", "objective", "outcome", "health", "trend", "progress", "plannedStart", "actualStart", "baselineFinish", "forecastFinish", "mandatoryDeadline", "valueScore", "urgencyScore", "consequenceScore", "finalPriority", "nextMilestone", "nextMilestoneDate", "blockerState", "topBlocker", "decisionRequired", "decisionText", "decisionDueDate", "managementAttention", "isDemo", "lastUpdatedAt"] as const;
 export type PortfolioSortKey = (typeof portfolioSortKeys)[number];
-export const portfolioColumnKeys = ["name", "id", "projectNumber", "category", "lifecycleStatus", "health", "trend", "owner", "sponsor", "coordinator", "deliveryLead", "department", "description", "objective", "outcome", "valueScore", "urgencyScore", "consequenceScore", "finalPriority", "suggestedPriority", "progress", "baselineFinish", "forecastFinish", "mandatoryDeadline", "nextMilestone", "nextMilestoneDate", "blockerState", "blocker", "decisionRequired", "decisionText", "decisionDueDate", "managementAttention", "isDemo", "lastUpdatedAt"] as const;
+export const portfolioColumnKeys = ["name", "id", "projectNumber", "category", "lifecycleStatus", "health", "trend", "owner", "sponsor", "coordinator", "deliveryLead", "department", "description", "objective", "outcome", "valueScore", "urgencyScore", "consequenceScore", "finalPriority", "progress", "plannedStart", "actualStart", "baselineFinish", "forecastFinish", "mandatoryDeadline", "nextMilestone", "nextMilestoneDate", "blockerState", "blocker", "decisionRequired", "decisionText", "decisionDueDate", "managementAttention", "isDemo", "lastUpdatedAt"] as const;
 export type PortfolioColumnKey = (typeof portfolioColumnKeys)[number];
 export type PortfolioViewColumns = Record<string, PortfolioColumnKey[]>;
 export interface CustomPortfolioView { id:string; label:string; description:string; }
@@ -40,7 +40,6 @@ export interface PortfolioSettings {
   headerGraphic: string | null;
   viewColumns: PortfolioViewColumns;
   customViews: CustomPortfolioView[];
-  activeUserId:string | null;
   updatedAt: string;
 }
 
@@ -55,6 +54,19 @@ export interface Department {
   updatedAt: string;
 }
 
+export const projectRoleValues = ["sponsor", "owner", "coordinator", "executor"] as const;
+export type ProjectRole = (typeof projectRoleValues)[number];
+export interface ProjectRoleInput {
+  name: string;
+  role: ProjectRole;
+  isPrimary?: boolean;
+}
+export interface ProjectRoleAssignment extends ProjectRoleInput {
+  id: string;
+  isPrimary: boolean;
+  position: number;
+}
+
 export interface ProjectSummary {
   id: string;
   projectCode: string;
@@ -63,10 +75,7 @@ export interface ProjectSummary {
   category: ProjectCategory;
   leadDepartment: string | null;
   leadDepartmentId: string | null;
-  owner: string;
-  sponsor: string | null;
-  coordinator: string | null;
-  deliveryLead: string | null;
+  roles: ProjectRoleAssignment[];
   description: string | null;
   objective: string | null;
   outcome: string | null;
@@ -74,6 +83,8 @@ export interface ProjectSummary {
   health: ProjectHealth;
   trend: Trend;
   progress: number | null;
+  plannedStart: string | null;
+  actualStart: string | null;
   baselineFinish: string | null;
   forecastFinish: string | null;
   mandatoryDeadline: string | null;
@@ -81,7 +92,6 @@ export interface ProjectSummary {
   urgencyScore: UrgencyScore;
   consequenceScore: Score;
   finalPriority: Priority;
-  priorityOverrideReason: string | null;
   suggestedPriority: Priority;
   nextMilestone: string | null;
   nextMilestoneDate: string | null;
@@ -99,18 +109,16 @@ export interface ProjectSummary {
 export interface ProjectDetail extends ProjectSummary {}
 
 export interface ProjectInput {
-  projectCode?: string;
   name: string;
   category: ProjectCategory;
   leadDepartmentId?: string | null;
-  owner: string;
-  sponsor?: string | null;
-  coordinator?: string | null;
-  deliveryLead?: string | null;
+  roles: ProjectRoleInput[];
   lifecycleStatus?: LifecycleStatus;
   description?: string | null;
   objective?: string | null;
   outcome?: string | null;
+  plannedStart?: string | null;
+  actualStart?: string | null;
   baselineFinish?: string | null;
   forecastFinish?: string | null;
   mandatoryDeadline?: string | null;
@@ -118,7 +126,6 @@ export interface ProjectInput {
   urgencyScore?: UrgencyScore;
   consequenceScore?: Score;
   finalPriority?: Priority;
-  priorityOverrideReason?: string | null;
   managementAttention?: boolean;
   isDemo?: boolean;
 }
@@ -171,10 +178,24 @@ export interface StatusReportHistoryItem extends StatusReportInput {
 
 export interface AppUser {
   id:string;
+  username:string;
   displayName:string;
+  isAdmin:boolean;
   isActive:boolean;
+  lastLoginAt:string | null;
   createdAt:string;
   updatedAt:string;
+}
+
+export interface AuthState {
+  authenticated:boolean;
+  setupRequired:boolean;
+  user:AppUser | null;
+}
+
+export interface UserCredentialsInput {
+  username:string;
+  password:string;
 }
 
 const priorityMatrix: Priority[][] = [
