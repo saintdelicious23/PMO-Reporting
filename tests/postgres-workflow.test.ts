@@ -16,8 +16,9 @@ test("osnovne izmene ne stvaraju status i status ne menja rokove", {skip:!proces
       leadDepartmentId:department.id,
       roles:[
         {name:"Primarni vlasnik",role:"owner",isPrimary:true},
-        {name:"Drugi vlasnik",role:"owner"},
-        {name:"Sponzor testa",role:"sponsor",isPrimary:true}
+        {name:"Drugi vlasnik",role:"owner",isPrimary:true},
+        {name:"Sponzor testa",role:"sponsor"},
+        {name:"Drugi sponzor",role:"sponsor"}
       ],
       lifecycleStatus:"active",
       plannedStart:"2026-01-15",
@@ -30,6 +31,8 @@ test("osnovne izmene ne stvaraju status i status ne menja rokove", {skip:!proces
     projectId=created.id;
     assert.match(created.projectCode,new RegExp(`^${new Date().getUTCFullYear()}-${department.code}-\\d{3,}$`));
     assert.deepEqual(created.roles.filter(role=>role.role==="owner").map(role=>role.name),["Primarni vlasnik","Drugi vlasnik"]);
+    assert.equal(created.roles.filter(role=>role.role==="owner"&&role.isPrimary).length,2);
+    assert.equal(created.roles.filter(role=>role.role==="sponsor"&&role.isPrimary).length,0);
     assert.equal(created.plannedStart,"2026-01-15");
     assert.equal(created.actualStart,"2026-01-22");
     assert.equal((await repository.listStatusReports(created.id)).length,0);

@@ -22,7 +22,7 @@ test("projekat prihvata UUID sektora nezavisno od UUID verzije", () => {
   const result = projectInputSchema.safeParse({
     name: "Test projekat",
     category: "strategic",
-    roles: [{name:"Vlasnik",role:"owner"}],
+    roles: [{name:"Vlasnik",role:"owner",isPrimary:true}],
     plannedStart:"2026-01-15",
     actualStart:"2026-01-22",
     leadDepartmentId: "8ca8be00-4bb4-2f9b-c675-0a7a3e5d6b12"
@@ -34,11 +34,19 @@ test("projekat prihvata UUID sektora nezavisno od UUID verzije", () => {
   assert.equal(projectInputSchema.safeParse({
     name:"Više uloga",category:"strategic",roles:[
       {name:"Vlasnik A",role:"owner",isPrimary:true},
-      {name:"Vlasnik B",role:"owner"},
+      {name:"Vlasnik B",role:"owner",isPrimary:true},
+      {name:"Sponzor A",role:"sponsor",isPrimary:true},
+      {name:"Sponzor B",role:"sponsor",isPrimary:true},
       {name:"Koordinator",role:"coordinator"},
       {name:"Izvršilac",role:"executor"}
     ]
   }).success,true);
+  assert.equal(projectInputSchema.safeParse({
+    name:"Bez glavnog vlasnika",category:"strategic",roles:[
+      {name:"Vlasnik A",role:"owner"},
+      {name:"Vlasnik B",role:"owner"}
+    ]
+  }).success,false);
 });
 
 test("podešavanja odbijaju obrisan osnovni ili referencirani pregled", () => {

@@ -392,12 +392,17 @@ async function loadAuditView(id:string){const container=document.querySelector<H
 function auditEventCard(event:AuditEvent){const changes=Object.entries(event.changedFields??{});return `<article class="status-timeline-item"><time>${esc(historyDate(event.occurredAt))}<br>${esc(event.actorName)}</time><div><strong>${esc(event.summary??event.action)}</strong>${changes.length?`<div class="status-change-list">${changes.map(([field,change])=>`<div><b>${esc(field==="roles"?"Projektne uloge":columnLabels[field as ColumnKey]??field)}</b><span class="change-before">${esc(historyValue(field as keyof StatusReportHistoryItem,change.before))}</span><span aria-hidden="true">→</span><span class="change-after">${esc(historyValue(field as keyof StatusReportHistoryItem,change.after))}</span></div>`).join("")}</div>`:""}</div></article>`;}
 
 function roleChip(assignment:Pick<ProjectRoleAssignment,"name"|"role"|"isPrimary">){
+  const primaryAction=assignment.isPrimary?"Ukloni oznaku glavne osobe":"Označi kao glavnu osobu";
   return `<span class="person-chip ${assignment.isPrimary?"primary":""}" data-role-chip data-role="${assignment.role}" data-name="${esc(assignment.name)}" data-primary="${assignment.isPrimary}">
-    <span>${esc(assignment.name)}</span><button type="button" data-primary-person title="Postavi kao glavnu osobu" aria-label="Postavi ${esc(assignment.name)} kao glavnu osobu">★</button><button type="button" data-remove-person aria-label="Ukloni ${esc(assignment.name)}">×</button>
+    <span>${esc(assignment.name)}</span><button type="button" data-primary-person title="${primaryAction}" aria-label="${primaryAction}: ${esc(assignment.name)}">★</button><button type="button" data-remove-person aria-label="Ukloni ${esc(assignment.name)}">×</button>
   </span>`;
 }
 function roleEditor(role:ProjectRole,assignments:ProjectRoleAssignment[]){
-  const hint=role==="owner"?"Najmanje jedan vlasnik je obavezan.":role==="coordinator"||role==="executor"?"Ako nije navedeno, podrazumevaju se vlasnici i uloga se ne ponavlja u pregledu.":"Opciono.";
+  const hint=role==="owner"
+    ?"Najmanje jedan vlasnik mora biti glavni; glavnih može biti više."
+    : role==="coordinator"||role==="executor"
+      ?"Opciono; bez unosa se podrazumevaju vlasnici. Glavnih može biti nula ili više."
+      :"Opciono; glavnih može biti nula ili više.";
   return `<div class="role-field span-3" data-role-editor="${role}"><div class="role-field-head"><span>${roleMeta[role].plural}${role==="owner"?" *":""}</span><small>${hint}</small></div><div class="person-chip-list">${assignments.map(roleChip).join("")}<input data-person-entry="${role}" maxlength="120" placeholder="Dodaj osobu; Enter ili zarez" /></div></div>`;
 }
 function collectProjectRoles(form:HTMLFormElement):ProjectRoleInput[]{
@@ -437,7 +442,7 @@ function addPeopleFromEntry(input:HTMLInputElement){
   const existing=new Set(Array.from(editor.querySelectorAll<HTMLElement>("[data-role-chip]")).map(chip=>chip.dataset.name!.toLocaleLowerCase("sr")));
   for(const name of names){
     if(existing.has(name.toLocaleLowerCase("sr")))continue;
-    const isPrimary=editor.querySelectorAll("[data-role-chip]").length===0;
+    const isPrimary=role==="owner"&&editor.querySelectorAll("[data-role-chip]").length===0;
     input.insertAdjacentHTML("beforebegin",roleChip({name,role,isPrimary}));
     existing.add(name.toLocaleLowerCase("sr"));
   }
@@ -445,7 +450,16 @@ function addPeopleFromEntry(input:HTMLInputElement){
 }
 function setPrimaryPerson(chip:HTMLElement){
   const editor=chip.closest<HTMLElement>("[data-role-editor]");if(!editor)return;
-  editor.querySelectorAll<HTMLElement>("[data-role-chip]").forEach(item=>{const active=item===chip;item.dataset.primary=String(active);item.classList.toggle("primary",active);});
+  const role=editor.dataset.roleEditor as ProjectRole;
+  const active=chip.dataset.primary==="true";
+  const primaryCount=editor.querySelectorAll<HTMLElement>('[data-role-chip][data-primary="true"]').length;
+  if(role==="owner"&&active&&primaryCount===1){toast("Najmanje jedan vlasnik mora ostati označen kao glavni.","error");return;}
+  const next=!active;
+  chip.dataset.primary=String(next);
+  chip.classList.toggle("primary",next);
+  const button=chip.querySelector<HTMLButtonElement>("[data-primary-person]"),name=chip.dataset.name??"osoba";
+  const action=next?"Ukloni oznaku glavne osobe":"Označi kao glavnu osobu";
+  if(button){button.title=action;button.setAttribute("aria-label",`${action}: ${name}`);}
 }
 function removePersonChip(chip:HTMLElement){
   const editor=chip.closest<HTMLElement>("[data-role-editor]"),role=editor?.dataset.roleEditor;
@@ -453,7 +467,9 @@ function removePersonChip(chip:HTMLElement){
   const chips=Array.from(editor.querySelectorAll<HTMLElement>("[data-role-chip]"));
   if(role==="owner"&&chips.length===1){toast("Projekat mora imati najmanje jednog vlasnika.","error");return;}
   const wasPrimary=chip.dataset.primary==="true";chip.remove();
-  if(wasPrimary){const next=editor.querySelector<HTMLElement>("[data-role-chip]");if(next)setPrimaryPerson(next);}
+  if(role==="owner"&&wasPrimary&&!editor.querySelector('[data-role-chip][data-primary="true"]')){
+    const next=editor.querySelector<HTMLElement>("[data-role-chip]");if(next)setPrimaryPerson(next);
+  }
 }
 function handleAppKeydown(e:KeyboardEvent){
   const entry=(e.target as HTMLElement).closest<HTMLInputElement>("[data-person-entry]");
@@ -661,6 +677,7 @@ async function saveProject(e:Event) {
     form.querySelectorAll<HTMLInputElement>("[data-person-entry]").forEach(entry=>{if(entry.value.trim())addPeopleFromEntry(entry);});
     const roles=collectProjectRoles(form);
     if(!roles.some(role=>role.role==="owner"))throw new Error("Projekat mora imati najmanje jednog vlasnika.");
+    if(!roles.some(role=>role.role==="owner"&&role.isPrimary))throw new Error("Najmanje jedan vlasnik mora biti označen kao glavni.");
     selected=await api.updateProject(selected.id,{name:String(f.get("name")),category:String(f.get("category")) as ProjectCategory,leadDepartmentId:nullable(f,"leadDepartmentId"),roles,lifecycleStatus:String(f.get("lifecycleStatus")) as ProjectDetail["lifecycleStatus"],description:nullable(f,"description"),objective:nullable(f,"objective"),outcome:nullable(f,"outcome"),plannedStart:dateFromForm(f,"plannedStart","Planirani početak"),actualStart:dateFromForm(f,"actualStart","Stvarni početak"),baselineFinish:dateFromForm(f,"baselineFinish","Prvobitni rok"),mandatoryDeadline:dateFromForm(f,"mandatoryDeadline","Obavezni krajnji rok"),valueScore:Number(f.get("valueScore")) as Score,urgencyScore:Number(f.get("urgencyScore")) as UrgencyScore,consequenceScore:Number(f.get("consequenceScore")) as Score,finalPriority:String(f.get("finalPriority")) as Priority,isDemo:f.get("isDemo")==="on"},selected.lastUpdatedAt);
     projects=await api.listProjects();render();renderDrawer("overview");toast("Izmene su sačuvane");
   }catch(error){toast(error instanceof Error?error.message:"Čuvanje nije uspelo","error");}

@@ -26,7 +26,7 @@ const normalizeRoles=(roles:ProjectRoleInput[]):ProjectRoleInput[]=>{
   const normalized:ProjectRoleInput[]=[];
   for(const role of ["sponsor","owner","coordinator","executor"] as const){
     const group=roles.filter(assignment=>assignment.role===role).map(assignment=>({...assignment,name:assignment.name.trim()}));
-    if(group.length&&!group.some(assignment=>assignment.isPrimary))group[0]!.isPrimary=true;
+    if(role==="owner"&&group.length&&!group.some(assignment=>assignment.isPrimary))group[0]!.isPrimary=true;
     normalized.push(...group);
   }
   return normalized;

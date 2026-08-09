@@ -83,8 +83,6 @@ CREATE UNIQUE INDEX project_role_assignment_unique
   ON project_role_assignments(project_id, role, lower(person_name));
 CREATE INDEX project_role_assignment_project_idx
   ON project_role_assignments(project_id, role, position);
-CREATE UNIQUE INDEX project_role_primary_unique
-  ON project_role_assignments(project_id, role) WHERE is_primary;
 
 CREATE TABLE status_reports (
   id uuid PRIMARY KEY,

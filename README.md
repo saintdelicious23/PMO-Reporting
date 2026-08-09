@@ -81,7 +81,7 @@ Dugme `Preuzmi PDF` direktno generiše i preuzima PDF bez sistemskog print dijal
 
 ## Uloge na projektu
 
-Projekat može imati jednog ili više sponzora, vlasnika, koordinatora i izvršilaca. Najmanje jedan vlasnik je obavezan, dok su ostale uloge opcione. Za svaku ulogu može da se označi jedna glavna osoba.
+Projekat može imati jednog ili više sponzora, vlasnika, koordinatora i izvršilaca. Najmanje jedan vlasnik je obavezan, dok su ostale uloge opcione. Svaka uloga može imati više glavnih osoba; sponzori, koordinatori i izvršioci mogu biti i bez glavne osobe, dok najmanje jedan vlasnik mora biti označen kao glavni.
 
 Osobe se u editoru dodaju pojedinačno pritiskom na Enter ili unosom više imena razdvojenih zarezom. Ako koordinator ili izvršilac nisu posebno navedeni, podrazumevaju se vlasnici projekta; prazne opcione uloge se zato ne ponavljaju u kartičnom i tabelarnom prikazu. Nazivi uloga u prikazu automatski prelaze iz jednine u množinu kada ih ima više.
 

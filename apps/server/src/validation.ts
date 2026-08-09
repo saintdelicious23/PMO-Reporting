@@ -11,13 +11,13 @@ const projectRolesSchema=z.array(z.object({
   isPrimary:z.boolean().optional()
 })).min(1).max(60).superRefine((roles,ctx)=>{
   if(!roles.some(role=>role.role==="owner"))ctx.addIssue({code:"custom",message:"Projekat mora imati najmanje jednog vlasnika."});
+  if(!roles.some(role=>role.role==="owner"&&role.isPrimary))ctx.addIssue({code:"custom",message:"Najmanje jedan vlasnik mora biti označen kao glavni."});
   const seen=new Set<string>();
   for(const [index,assignment] of roles.entries()){
     const key=`${assignment.role}:${assignment.name.toLocaleLowerCase("sr")}`;
     if(seen.has(key))ctx.addIssue({code:"custom",path:[index,"name"],message:"Ista osoba ne može biti dva puta u istoj ulozi."});
     seen.add(key);
   }
-  for(const role of projectRoleValues)if(roles.filter(assignment=>assignment.role===role&&assignment.isPrimary).length>1)ctx.addIssue({code:"custom",message:`Uloga ${role} može imati samo jednu glavnu osobu.`});
 });
 
 export const projectInputSchema = z.object({
