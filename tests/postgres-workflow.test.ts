@@ -48,10 +48,11 @@ test("osnovne izmene ne stvaraju status i status ne menja rokove", {skip:!proces
     const blocked=await repository.addStatusReport(created.id,{
       health:"amber",trend:"stable",progress:40,forecastFinish:"2027-11-30",
       blockerState:"blocked",topBlocker:null,decisionRequired:false,
-      managementAttention:false,summary:null
+      managementAttention:false,summary:"Završena analiza i potvrđen plan naredne nedelje."
     });
     assert.equal(blocked?.lifecycleStatus,"blocked");
     assert.equal(blocked?.mandatoryDeadline,"2027-12-31");
+    assert.equal(blocked?.lastStatusSummary,"Završena analiza i potvrđen plan naredne nedelje.");
     assert.notEqual(blocked!.lastUpdatedAt,afterPriority!.lastUpdatedAt);
 
     const unblocked=await repository.addStatusReport(created.id,{

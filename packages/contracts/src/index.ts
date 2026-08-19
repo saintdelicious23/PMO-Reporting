@@ -104,6 +104,7 @@ export interface ProjectSummary {
   isDemo: boolean;
   lastUpdatedAt: string;
   lastStatusAt: string | null;
+  lastStatusSummary: string | null;
 }
 
 export interface ProjectDetail extends ProjectSummary {}
