@@ -80,7 +80,8 @@ function mapSummary(row: Row): ProjectSummary {
     topBlocker: row.top_blocker ? String(row.top_blocker) : null, decisionRequired: Boolean(row.decision_required),
     decisionText: row.decision_text ? String(row.decision_text) : null, decisionDueDate: date(row.decision_due_date),
     managementAttention: Boolean(row.status_management_attention ?? row.management_attention), isDemo:Boolean(row.is_demo),
-    lastUpdatedAt:timestamp(row.updated_at),lastStatusAt:row.report_created_at?timestamp(row.report_created_at):null
+    lastUpdatedAt:timestamp(row.updated_at),lastStatusAt:row.report_created_at?timestamp(row.report_created_at):null,
+    lastStatusSummary:row.status_summary?String(row.status_summary):null
   };
 }
 
@@ -88,7 +89,7 @@ const summarySql = `
   SELECT p.*, s.health, s.trend, s.progress, s.forecast_finish AS status_forecast_finish,
     s.next_milestone, s.next_milestone_date, s.blocker_state, s.top_blocker,
     s.decision_required, s.decision_text, s.decision_due_date,
-    s.management_attention AS status_management_attention, s.created_at AS report_created_at,
+    s.management_attention AS status_management_attention, s.summary AS status_summary, s.created_at AS report_created_at,
     department.name AS department_name, COALESCE(project_roles.assignments,'[]'::jsonb) AS roles
   FROM projects p
   LEFT JOIN departments department ON department.id = p.lead_department_id

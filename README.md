@@ -77,7 +77,7 @@ pristupa korisničkim imenom i lozinkom, a administrator nove naloge pravi u men
 
 Kod projekta se automatski dodeljuje pri kreiranju u formatu `GGGG-SEKTOR-NNN`, na primer `2026-FIN-003`. Ako vodeći sektor nije izabran, koristi se oznaka `GEN`. Jednom dodeljen kod se ne menja naknadnom promenom sektora.
 
-Dugme `Preuzmi PDF` direktno generiše i preuzima PDF bez sistemskog print dijaloga. Ime fajla automatski dobija datum i vreme, na primer `project-portfolio_2026-07-18_14-35-22.pdf`.
+Dugme `Preuzmi PDF` nudi dva namenska izlaza bez sistemskog print dijaloga. `Direktorski pregled` polazi od svedenog prikaza i za aktivne projekte prikazuje stanje, odgovornost, prioritet, napredak, komentar poslednjeg statusnog preseka, rok, prepreku i starost preseka. `Detaljni pregled projekata` slaže sva raspoloživa polja u čitljiv projektni dosije i dodaje do tri prethodna preseka uz aktuelni status, odnosno najviše četiri poslednja komentara. Ime fajla automatski dobija vrstu pregleda, datum i vreme.
 
 ## Uloge na projektu
 

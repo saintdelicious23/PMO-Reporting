@@ -252,7 +252,7 @@ export const seedProjects:ProjectDetail[] = specs.map((spec,index) => {
     mandatoryDeadline:spec.mandatory===undefined||spec.mandatory===null?null:isoDate(spec.mandatory),valueScore:spec.value,urgencyScore:spec.urgency,consequenceScore:spec.consequence,
     finalPriority:spec.priority??suggested,suggestedPriority:suggested,nextMilestone:spec.milestone??null,nextMilestoneDate:spec.milestoneIn===undefined||spec.milestoneIn===null?null:isoDate(spec.milestoneIn),
     blockerState:spec.blocker==="blocked"?"blocked":"none",topBlocker:spec.topBlocker??null,decisionRequired:spec.decision??false,decisionText:spec.decisionText??null,
-    decisionDueDate:spec.decisionIn===undefined||spec.decisionIn===null?null:isoDate(spec.decisionIn),managementAttention:spec.attention??false,isDemo:true,lastUpdatedAt:timestamp(spec.updated),lastStatusAt:timestamp(spec.updated)
+    decisionDueDate:spec.decisionIn===undefined||spec.decisionIn===null?null:isoDate(spec.decisionIn),managementAttention:spec.attention??false,isDemo:true,lastUpdatedAt:timestamp(spec.updated),lastStatusAt:timestamp(spec.updated),lastStatusSummary:null
   };
   return project;
 });
